@@ -1,21 +1,19 @@
 package london_police;
 
 import java.io.Serializable;
-import com.google.gson.annotations.SerializedName;
 
-public class ForceResponse implements Serializable {
+public class Neighbourhood implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @SerializedName("id")
     String id;
-
-    @SerializedName("name")
     String name;
+    ForceResponse force;
 
     @Override
     public boolean equals(Object obj) {
-        ForceResponse other = (ForceResponse) obj;
+        Neighbourhood other = (Neighbourhood) obj;
         return other != null && Helper.objectEquals(this.id, other.id)
-                && Helper.objectEquals(this.name, other.name);
+                && Helper.objectEquals(this.name, other.name)
+                && Helper.objectEquals(this.force, other.force);
     }
 }

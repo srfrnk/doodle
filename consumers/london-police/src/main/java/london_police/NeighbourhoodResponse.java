@@ -15,6 +15,7 @@ public class NeighbourhoodResponse implements Serializable {
     @Override
     public boolean equals(Object obj) {
         NeighbourhoodResponse other = (NeighbourhoodResponse) obj;
-        return this.id.equals(other.id) && this.name.equals(other.name);
+        return other != null && Helper.objectEquals(this.id, other.id)
+                && Helper.objectEquals(this.name, other.name);
     }
 }

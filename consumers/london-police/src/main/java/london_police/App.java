@@ -10,6 +10,7 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Sample;
 import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,21 +22,27 @@ public class App {
     public static void main(String[] args) {
         DirectOptions options = PipelineOptionsFactory.create().as(DirectOptions.class);
         options.setRunner(DirectRunner.class);
-        options.setBlockOnRun(true);
-        options.setTargetParallelism(1);
 
         Pipeline p = Pipeline.create(options);
 
         PCollection<String> start = p.apply(Create.of(""));
-        PCollection<ForceResponse> forces = start.apply(new ReadForces(App.apiPoliceUrl));
-        PCollection<NeighbourhoodResponse> neighbourhoods = forces.apply(new ReadNeighbourhoods(App.apiPoliceUrl));
 
-        neighbourhoods.apply("", ParDo.of(new DoFn<NeighbourhoodResponse, Void>() {
+        PCollection<ForceResponse> forces = start.apply(new ReadForces(App.apiPoliceUrl));
+        forces = forces.apply(Sample.any(1));
+
+        PCollection<Neighbourhood> neighbourhoods =
+                forces.apply(new ReadNeighbourhoods(App.apiPoliceUrl));
+        neighbourhoods = neighbourhoods.apply(Sample.any(1));
+
+        PCollection<Boundry> boundries = neighbourhoods.apply(new ReadBoundries(App.apiPoliceUrl));
+        PCollection<CrimeResponse> crimes = boundries.apply(new ReadCrimes(App.apiPoliceUrl));
+
+        crimes.apply(ParDo.of(new DoFn<CrimeResponse, Void>() {
             private static final long serialVersionUID = 1L;
 
             @ProcessElement
-            public void processElement(@Element NeighbourhoodResponse input) {
-                LOG.info(String.format("%s ; %s", input.id, input.name));
+            public void processElement(@Element CrimeResponse input) {
+                LOG.info(Json.format(input));
             }
         }));
 

@@ -6,7 +6,7 @@ import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
 
 public class ReadNeighbourhoods
-        extends PTransform<PCollection<ForceResponse>, PCollection<NeighbourhoodResponse>> {
+        extends PTransform<PCollection<ForceResponse>, PCollection<Neighbourhood>> {
     private static final long serialVersionUID = 1L;
     private String apiPoliceUrl;
 
@@ -15,11 +15,11 @@ public class ReadNeighbourhoods
     }
 
     @Override
-    public PCollection<NeighbourhoodResponse> expand(PCollection<ForceResponse> input) {
-        return input.apply("Read Forces", ParDo.of(new ReadNeighbourhoodsDoFn(this.apiPoliceUrl)));
+    public PCollection<Neighbourhood> expand(PCollection<ForceResponse> input) {
+        return input.apply("Read Neighbourhoods", ParDo.of(new ReadNeighbourhoodsDoFn(this.apiPoliceUrl)));
     }
 
-    private static class ReadNeighbourhoodsDoFn extends DoFn<ForceResponse, NeighbourhoodResponse> {
+    private static class ReadNeighbourhoodsDoFn extends DoFn<ForceResponse, Neighbourhood> {
         private static final long serialVersionUID = 1L;
         private String apiPoliceUrl;
 
@@ -29,12 +29,15 @@ public class ReadNeighbourhoods
 
         @ProcessElement
         public void processElement(@Element ForceResponse force,
-                OutputReceiver<NeighbourhoodResponse> output) {
-            Reader reader = new Reader();
-            NeighbourhoodResponse[] neighbourhoods = reader.getJson(
+                OutputReceiver<Neighbourhood> output) {
+            NeighbourhoodResponse[] neighbourhoods = Reader.getJson(
                     String.format("%s/%s/neighbourhoods", this.apiPoliceUrl, force.id),
                     NeighbourhoodResponse[].class);
-            for (NeighbourhoodResponse neighbourhood : neighbourhoods) {
+            for (NeighbourhoodResponse neighbourhoodResponse : neighbourhoods) {
+                Neighbourhood neighbourhood = new Neighbourhood();
+                neighbourhood.id = neighbourhoodResponse.id;
+                neighbourhood.name = neighbourhoodResponse.name;
+                neighbourhood.force = force;
                 output.output(neighbourhood);
             }
         }
