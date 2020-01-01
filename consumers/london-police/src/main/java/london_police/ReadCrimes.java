@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import com.google.common.net.MediaType;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
@@ -37,18 +38,14 @@ public class ReadCrimes extends PTransform<PCollection<Boundry>, PCollection<Cri
 
         @ProcessElement
         public void processElement(@Element Boundry boundry, OutputReceiver<CrimeResponse> output) {
-            // ArrayList<Point> points = new ArrayList<>(Arrays.asList(boundry.points));
-            // if (points.get(0).equals(points.get(points.size() - 1))) {
-            // points.remove((points.size() - 1));
-            // }
             List<Point> points = Arrays.asList(boundry.points);
             String boundryString = String.join(":", points.stream().map((Point point) -> {
                 return String.format("%s,%s", point.latitude, point.longitude);
             }).collect(Collectors.toList()));
             CrimeResponse[] crimes =
-                    Reader.postJson(String.format("%s/crimes-street/all-crime", this.apiPoliceUrl),
-                            String.format("poly=%s", boundryString),
-                            "application/x-www-form-urlencoded", CrimeResponse[].class);
+                    ApiReader.postJson(String.format("%s/crimes-street/all-crime", this.apiPoliceUrl),
+                            String.format("poly=%s", boundryString), MediaType.FORM_DATA,
+                            CrimeResponse[].class);
             for (CrimeResponse crimeResponse : crimes) {
                 output.output(crimeResponse);
             }

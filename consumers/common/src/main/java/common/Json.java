@@ -1,5 +1,4 @@
-
-package london_police;
+package common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

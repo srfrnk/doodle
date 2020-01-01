@@ -1,6 +1,7 @@
 package london_police;
 
 import java.io.Serializable;
+import common.Helper;
 
 public class Neighbourhood implements Serializable {
     private static final long serialVersionUID = 1L;

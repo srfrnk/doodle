@@ -1,4 +1,4 @@
-package london_police;
+package common;
 
 public class Helper {
     public static boolean objectEquals(Object obj1, Object obj2) {

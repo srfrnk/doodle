@@ -30,7 +30,7 @@ public class ReadBoundries extends PTransform<PCollection<Neighbourhood>, PColle
         @ProcessElement
         public void processElement(@Element Neighbourhood neighbourhood,
                 OutputReceiver<Boundry> output) {
-            Point[] points = Reader.getJson(String.format("%s/%s/%s/boundary", this.apiPoliceUrl,
+            Point[] points = ApiReader.getJson(String.format("%s/%s/%s/boundary", this.apiPoliceUrl,
                     neighbourhood.force.id, neighbourhood.id), Point[].class);
             Boundry boundary = new Boundry();
             boundary.points = points;

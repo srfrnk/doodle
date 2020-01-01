@@ -28,7 +28,7 @@ public class ReadForces extends PTransform<PCollection<String>, PCollection<Forc
 
         @ProcessElement
         public void processElement(OutputReceiver<ForceResponse> output) {
-            ForceResponse[] forces = Reader.getJson(String.format("%s/forces", this.apiPoliceUrl),
+            ForceResponse[] forces = ApiReader.getJson(String.format("%s/forces", this.apiPoliceUrl),
             ForceResponse[].class);
             for (ForceResponse force : forces) {
                 output.output(force);

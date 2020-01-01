@@ -30,7 +30,7 @@ public class ReadNeighbourhoods
         @ProcessElement
         public void processElement(@Element ForceResponse force,
                 OutputReceiver<Neighbourhood> output) {
-            NeighbourhoodResponse[] neighbourhoods = Reader.getJson(
+            NeighbourhoodResponse[] neighbourhoods = ApiReader.getJson(
                     String.format("%s/%s/neighbourhoods", this.apiPoliceUrl, force.id),
                     NeighbourhoodResponse[].class);
             for (NeighbourhoodResponse neighbourhoodResponse : neighbourhoods) {
