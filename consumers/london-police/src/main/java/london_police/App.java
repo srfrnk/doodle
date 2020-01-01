@@ -6,22 +6,18 @@ package london_police;
 import org.apache.beam.runners.direct.DirectOptions;
 import org.apache.beam.runners.direct.DirectRunner;
 import org.apache.beam.sdk.Pipeline;
-import org.apache.beam.sdk.io.elasticsearch.ElasticsearchIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Create;
-import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.MapElements;
-import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.Sample;
 import org.apache.beam.sdk.values.PCollection;
-import org.apache.beam.sdk.values.TypeDescriptors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import common.Json;
+import common.WriteToES;
 
 public class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     public static String apiPoliceUrl = "https://data.police.uk/api";
+    public static String elasticSearchUrl = "http://localhost:9200";
 
     public static void main(String[] args) {
         DirectOptions options = PipelineOptionsFactory.create().as(DirectOptions.class);
@@ -39,22 +35,16 @@ public class App {
         neighbourhoods = neighbourhoods.apply(Sample.any(1));
 
         PCollection<Boundry> boundries = neighbourhoods.apply(new ReadBoundries(App.apiPoliceUrl));
-        PCollection<CrimeResponse> crimes = boundries.apply(new ReadCrimes(App.apiPoliceUrl));
-        PCollection<String> strings = crimes.apply("To String",
-                MapElements.into(TypeDescriptors.strings()).via(crime -> Json.format(crime)));
-        strings.apply("Write to ES",
-                ElasticsearchIO.write()
-                        .withConnectionConfiguration(ElasticsearchIO.ConnectionConfiguration.create(
-                                new String[] {"http://localhost:9200"}, "london-police", "crime")));
-        strings.apply(ParDo.of(new DoFn<String, Void>() {
-            private static final long serialVersionUID = 1L;
+        PCollection<Crime> crimes = boundries.apply(new ReadCrimes(App.apiPoliceUrl));
+        crimes.apply(new WriteToES<Crime>(elasticSearchUrl));
 
-            @ProcessElement
-            public void processElement(@Element String input) {
-                LOG.info(input);
-            }
-        }));
-
+        /*
+         * crimes.apply(ParDo.of(new DoFn<Elasticsearch.ESDoc<CrimeResponse>, Void>() { private
+         * static final long serialVersionUID = 1L;
+         *
+         * @ProcessElement public void processElement(@Element Elasticsearch.ESDoc<CrimeResponse>
+         * input) { LOG.info(Json.format(input)); } }));
+         */
         p.run().waitUntilFinish();
     }
 }

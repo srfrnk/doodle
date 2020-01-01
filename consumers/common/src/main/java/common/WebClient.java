@@ -17,7 +17,7 @@ public class WebClient {
         try {
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
+            if (response.statusCode() / 100 == 2) {
                 return response.body();
             } else {
                 throw new Exception(response.toString());

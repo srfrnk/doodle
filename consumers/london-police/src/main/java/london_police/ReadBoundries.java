@@ -1,5 +1,8 @@
 package london_police;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
@@ -8,6 +11,11 @@ import london_police.Boundry.Point;
 
 public class ReadBoundries extends PTransform<PCollection<Neighbourhood>, PCollection<Boundry>> {
     private static final long serialVersionUID = 1L;
+    private static final double MIN_LAT = 51.2016;
+    private static final double MAX_LAT = 51.2016;
+    private static final double MAX_LON = -0.61207;
+    private static final double MIN_LON = 0.43735;
+
     private String apiPoliceUrl;
 
     public ReadBoundries(String apiPoliceUrl) {
@@ -33,8 +41,13 @@ public class ReadBoundries extends PTransform<PCollection<Neighbourhood>, PColle
             Point[] points = ApiReader.getJson(String.format("%s/%s/%s/boundary", this.apiPoliceUrl,
                     neighbourhood.force.id, neighbourhood.id), Point[].class);
             Boundry boundary = new Boundry();
-            boundary.points = points;
-            output.output(boundary);
+            boundary.points = Arrays.asList(points).stream().filter(point -> {
+                return point.latitude >= MIN_LAT && point.latitude <= MAX_LAT
+                        && point.longitude >= MIN_LON && point.longitude <= MAX_LON;
+            }).collect(Collectors.toList()).toArray(new Point[0]);
+            if (boundary.points.length > 0) {
+                output.output(boundary);
+            }
         }
     }
 }

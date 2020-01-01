@@ -1,18 +1,40 @@
 package common;
 
+import com.fatboyindustrial.gsonjodatime.Converters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
 
 public class Json {
-    public static <T> T parse(String json, Class<T> clazz) {
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
-        return gson.fromJson(json, clazz);
-    }
+  private static Gson gson;
+  private static ArrayList<TypeAdapterFactory> factories = new ArrayList<>();
 
-    public static <T> String format(T json) {
-        GsonBuilder builder = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        Gson gson = builder.create();
-        return gson.toJson(json);
+  static {
+    initGson();
+  }
+
+  private static void initGson() {
+    GsonBuilder builder = new GsonBuilder();
+    for (TypeAdapterFactory factory : factories) {
+      builder.registerTypeAdapterFactory(factory);
     }
+    builder.serializeSpecialFloatingPointValues();
+    Converters.registerDateTime(builder);
+    gson = builder.create();
+  }
+
+  public static void addFactory(TypeAdapterFactory factory) {
+    factories.add(factory);
+    initGson();
+  }
+
+  public static <T> T parse(String json, Class<T> clazz) {
+    return gson.fromJson(json, clazz);
+  }
+
+  public static <T> String format(T object) {
+    return gson.toJson(object, new TypeToken<T>() {}.getType());
+  }
 }
