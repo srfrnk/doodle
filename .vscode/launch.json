@@ -9,7 +9,8 @@
             "name": "London Police Consumer",
             "request": "launch",
             "mainClass": "london_police.App",
-            "projectName": "london-police"
+            "projectName": "london-police",
+            "args": "full"
         }
     ]
 }

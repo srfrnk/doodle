@@ -30,7 +30,7 @@ public class WriteToES<T extends Elasticsearch.ESDoc> extends PTransform<PCollec
 
         @ProcessElement
         public void processElement(@Element T doc) {
-            Elasticsearch.write(doc, elasticSearchUrl);
+            Elasticsearch.writeDoc(doc, elasticSearchUrl);
         }
     }
 }

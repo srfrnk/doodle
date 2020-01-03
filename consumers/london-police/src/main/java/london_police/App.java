@@ -5,14 +5,19 @@ package london_police;
 
 import org.apache.beam.runners.direct.DirectOptions;
 import org.apache.beam.runners.direct.DirectRunner;
+import org.apache.beam.runners.flink.FlinkPipelineOptions;
+import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.Sample;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.vendor.grpc.v1p21p0.io.opencensus.trace.Tracestate.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import common.Elasticsearch;
 import common.WriteToES;
+import java.util.Map;
 
 public class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
@@ -22,29 +27,41 @@ public class App {
     public static void main(String[] args) {
         DirectOptions options = PipelineOptionsFactory.create().as(DirectOptions.class);
         options.setRunner(DirectRunner.class);
+        options.setTargetParallelism(20);
+
+        // FlinkPipelineOptions
+        // options=PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
+        // options.setRunner(FlinkRunner.class);
+        // options.setParallelism(20);
+        // options.setStreaming(true);
 
         Pipeline p = Pipeline.create(options);
 
         PCollection<String> start = p.apply(Create.of(""));
+        PCollection<NeighbourhoodBoundry> neighbourhoodBoundries = null;
 
-        PCollection<ForceResponse> forces = start.apply(new ReadForces(App.apiPoliceUrl));
-        forces = forces.apply(Sample.any(1));
+        if (args.length > 0 && args[0].equals("full")) {
+            Elasticsearch.deleteIndex("neighbourhood_boundries", elasticSearchUrl);
+            Elasticsearch.mapIndex("neighbourhood_boundries", Map
+                    .ofEntries(Map.entry("center", "geo_point"), Map.entry("geoShape", "geo_shape")),
+                    elasticSearchUrl);
 
-        PCollection<Neighbourhood> neighbourhoods =
-                forces.apply(new ReadNeighbourhoods(App.apiPoliceUrl));
-        neighbourhoods = neighbourhoods.apply(Sample.any(1));
+            PCollection<ForceResponse> forces = start.apply(new ReadForces(App.apiPoliceUrl));
+            // forces = forces.apply(Sample.any(1));
+            PCollection<Neighbourhood> neighbourhoods =
+                    forces.apply(new ReadNeighbourhoods(App.apiPoliceUrl));
+            // neighbourhoods = neighbourhoods.apply(Sample.any(1));
+            neighbourhoodBoundries =
+                    neighbourhoods.apply(new ReadNeighbourhoodBoundries(App.apiPoliceUrl));
+            neighbourhoodBoundries.apply(new WriteToES<NeighbourhoodBoundry>(elasticSearchUrl));
+        } else {
 
-        PCollection<Boundry> boundries = neighbourhoods.apply(new ReadBoundries(App.apiPoliceUrl));
-        PCollection<Crime> crimes = boundries.apply(new ReadCrimes(App.apiPoliceUrl));
-        crimes.apply(new WriteToES<Crime>(elasticSearchUrl));
+        }
 
-        /*
-         * crimes.apply(ParDo.of(new DoFn<Elasticsearch.ESDoc<CrimeResponse>, Void>() { private
-         * static final long serialVersionUID = 1L;
-         *
-         * @ProcessElement public void processElement(@Element Elasticsearch.ESDoc<CrimeResponse>
-         * input) { LOG.info(Json.format(input)); } }));
-         */
+        // PCollection<Crime> crimes = neighbourhoodBoundries.apply(new
+        // ReadCrimes(App.apiPoliceUrl));
+        // crimes.apply(new WriteToES<Crime>(elasticSearchUrl));
+
         p.run().waitUntilFinish();
     }
 }

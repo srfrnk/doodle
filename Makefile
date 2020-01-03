@@ -4,6 +4,10 @@ consume-london-police: FORCE
 	clear
 	gradle -p consumers/london-police run
 
+consume-london-police-full: FORCE
+	clear
+	gradle -p consumers/london-police run --args="full"
+
 start-db: FORCE
 	docker run -p 9200:9200 -p 9300:9300 --rm -d --name elasticsearch -e "discovery.type=single-node" \
 		--mount type=bind,source=$$(pwd)/data,target=/usr/share/elasticsearch/data \

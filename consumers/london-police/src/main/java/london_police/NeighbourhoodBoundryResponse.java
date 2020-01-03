@@ -4,7 +4,7 @@ import java.io.Serializable;
 import com.google.gson.annotations.SerializedName;
 import common.Helper;
 
-public class Boundry implements Serializable {
+public class NeighbourhoodBoundryResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static class Point implements Serializable {
@@ -24,22 +24,9 @@ public class Boundry implements Serializable {
         }
     }
 
-    Point[] points;
-
     @Override
     public boolean equals(Object obj) {
-        Boundry other = (Boundry) obj;
-
-        if (other == null || this.points == null || this.points.length != other.points.length) {
-            return false;
-        }
-
-        for (int i = 0; i < this.points.length; i++) {
-            if (!this.points[i].equals(other.points[i])) {
-                return false;
-            }
-        }
-
-        return true;
+        NeighbourhoodBoundryResponse other = (NeighbourhoodBoundryResponse) obj;
+        return other != null;
     }
 }
