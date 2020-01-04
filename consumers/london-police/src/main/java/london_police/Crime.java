@@ -10,6 +10,13 @@ public class Crime extends ESDoc {
 
     public Crime() {
         super("crimes");
+        this.location = new Location();
+    }
+
+    public Crime(String latitude, String longitude) {
+        this();
+        this.location.latitude = latitude;
+        this.location.longitude = longitude;
     }
 
     public static class Location implements Serializable {

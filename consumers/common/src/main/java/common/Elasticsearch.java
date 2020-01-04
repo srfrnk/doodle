@@ -1,10 +1,16 @@
 package common;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import com.google.common.net.MediaType;
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -30,6 +36,36 @@ public class Elasticsearch {
 
     @SerializedName("created")
     public String created;
+  }
+
+  public static class SearchDocResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @SerializedName("hits")
+    public HitsWrapper hits;
+
+    public static class HitsWrapper implements Serializable {
+      private static final long serialVersionUID = 1L;
+
+      @SerializedName("hits")
+      public Hit[] hits;
+
+      public static class Hit implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @SerializedName("_id")
+        public String id;
+
+        @SerializedName("_index")
+        public String index;
+
+        @SerializedName("_score")
+        public String score;
+
+        @SerializedName("_source")
+        public JsonObject source;
+      }
+    }
   }
 
   public static class DeleteIndexResponse implements Serializable {
@@ -116,24 +152,40 @@ public class Elasticsearch {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public static <T extends ESDoc> T[] searchDocs(String index, String query, Class<T> clazz,
+      String elasticSearchUrl) {
+    try {
+      SearchDocResponse searchDocsResponse =
+          WebClient.postJson(String.format("%s/%s/_search", elasticSearchUrl, index), query,
+              MediaType.JSON_UTF_8, SearchDocResponse.class);
+      return Arrays.asList(searchDocsResponse.hits.hits).stream()
+          .map(hit -> Json.parse(hit.source.toString(), clazz)).collect(Collectors.toList())
+          .toArray((T[]) Array.newInstance(clazz, 0));
+    } catch (Exception e) {
+      LOG.error(String.format("ES Write Error: %s", Logging.exception(e)));
+      return null;
+    }
+  }
+
   public static class ESDoc implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public ESDoc() {
+      this.index = "";
+    }
+
     public ESDoc(String index) {
-      this.timestamp = DateTime.now(DateTimeZone.UTC);
       this.index = index;
     }
 
-    @SerializedName("@timestamp")
-    public DateTime timestamp;
-
+    @Nullable
     public String index;
 
     @Override
     public boolean equals(Object obj) {
       ESDoc other = (ESDoc) obj;
-      return other != null && Helper.objectEquals(this.index, other.index)
-          && Helper.objectEquals(this.timestamp, other.timestamp);
+      return other != null && Helper.objectEquals(this.index, other.index);
     }
   }
 }

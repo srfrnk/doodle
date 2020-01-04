@@ -6,11 +6,19 @@
     "configurations": [
         {
             "type": "java",
-            "name": "London Police Consumer",
+            "name": "London Police Consumer Boundaries",
             "request": "launch",
             "mainClass": "london_police.App",
             "projectName": "london-police",
-            "args": "full"
+            "args": "boundaries"
+        },
+        {
+            "type": "java",
+            "name": "London Police Consumer Crimes",
+            "request": "launch",
+            "mainClass": "london_police.App",
+            "projectName": "london-police",
+            "args": "crimes"
         }
     ]
 }

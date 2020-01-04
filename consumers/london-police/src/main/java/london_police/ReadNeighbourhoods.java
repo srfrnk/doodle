@@ -45,7 +45,7 @@ public class ReadNeighbourhoods
         public void processElement(@Element ForceResponse force,
                 OutputReceiver<Neighbourhood[]> output)
                 throws WebResponseException, IOException, InterruptedException {
-            LOG.info(String.format("Reading: %s", force.id));
+            LOG.info(String.format("Reading: %s", force.name));
             NeighbourhoodResponse[] neighbourhoodRespones =
                     ApiReader.getJson(String.format("%s/%s/neighbourhoods", this.apiPoliceUrl,
                             WebClient.urlEncode(force.id)), NeighbourhoodResponse[].class);

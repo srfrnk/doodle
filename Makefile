@@ -1,12 +1,12 @@
 FORCE:
 
-consume-london-police: FORCE
+consume-london-police-crimes: FORCE
 	clear
-	gradle -p consumers/london-police run
+	gradle -p consumers/london-police run --args="crimes"
 
-consume-london-police-full: FORCE
+consume-london-police-boundaries: FORCE
 	clear
-	gradle -p consumers/london-police run --args="full"
+	gradle -p consumers/london-police run --args="boundaries"
 
 start-db: FORCE
 	docker run -p 9200:9200 -p 9300:9300 --rm -d --name elasticsearch -e "discovery.type=single-node" \

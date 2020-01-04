@@ -3,65 +3,50 @@
  */
 package london_police;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Map;
 import org.apache.beam.runners.direct.DirectOptions;
 import org.apache.beam.runners.direct.DirectRunner;
-import org.apache.beam.runners.flink.FlinkPipelineOptions;
-import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
-import org.apache.beam.sdk.transforms.Create;
-import org.apache.beam.sdk.transforms.Sample;
-import org.apache.beam.sdk.values.PCollection;
-import org.apache.beam.vendor.grpc.v1p21p0.io.opencensus.trace.Tracestate.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import common.Elasticsearch;
-import common.WriteToES;
-import java.util.Map;
 
 public class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     public static String apiPoliceUrl = "https://data.police.uk/api";
     public static String elasticSearchUrl = "http://localhost:9200";
 
-    public static void main(String[] args) {
-        DirectOptions options = PipelineOptionsFactory.create().as(DirectOptions.class);
-        options.setRunner(DirectRunner.class);
-        options.setTargetParallelism(20);
-
-        // FlinkPipelineOptions
-        // options=PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
-        // options.setRunner(FlinkRunner.class);
-        // options.setParallelism(20);
-        // options.setStreaming(true);
-
-        Pipeline p = Pipeline.create(options);
-
-        PCollection<String> start = p.apply(Create.of(""));
-        PCollection<NeighbourhoodBoundry> neighbourhoodBoundries = null;
-
-        if (args.length > 0 && args[0].equals("full")) {
-            Elasticsearch.deleteIndex("neighbourhood_boundries", elasticSearchUrl);
-            Elasticsearch.mapIndex("neighbourhood_boundries", Map
-                    .ofEntries(Map.entry("center", "geo_point"), Map.entry("geoShape", "geo_shape")),
-                    elasticSearchUrl);
-
-            PCollection<ForceResponse> forces = start.apply(new ReadForces(App.apiPoliceUrl));
-            // forces = forces.apply(Sample.any(1));
-            PCollection<Neighbourhood> neighbourhoods =
-                    forces.apply(new ReadNeighbourhoods(App.apiPoliceUrl));
-            // neighbourhoods = neighbourhoods.apply(Sample.any(1));
-            neighbourhoodBoundries =
-                    neighbourhoods.apply(new ReadNeighbourhoodBoundries(App.apiPoliceUrl));
-            neighbourhoodBoundries.apply(new WriteToES<NeighbourhoodBoundry>(elasticSearchUrl));
+    public static void main(String[] args) throws URISyntaxException, IOException {
+        if (args.length < 1) {
+            LOG.error("Either 'boundaries' or 'crimes' must be specified in args.");
         } else {
+            DirectOptions options = PipelineOptionsFactory.create().as(DirectOptions.class);
+            options.setRunner(DirectRunner.class);
+            options.setTargetParallelism(20);
+            Pipeline p = Pipeline.create(options);
+            switch (args[0]) {
+                case "boundaries":
+                    Elasticsearch.deleteIndex("neighbourhood_boundaries", elasticSearchUrl);
+                    Elasticsearch.mapIndex("neighbourhood_boundaries",
+                            Map.ofEntries(Map.entry("center", "geo_point"),
+                                    Map.entry("geoShape", "geo_shape")),
+                            elasticSearchUrl);
 
+                    p.apply(new UpdateNeighbourhoodBoundaries(App.apiPoliceUrl, elasticSearchUrl));
+                    break;
+                case "crimes":
+                    Elasticsearch.deleteIndex("crimes", elasticSearchUrl);
+                    Elasticsearch.mapIndex("crimes",
+                            Map.ofEntries(Map.entry("location", "geo_point")), elasticSearchUrl);
+
+                    p.apply(new UpdateCrimes(App.apiPoliceUrl, elasticSearchUrl));
+                    break;
+            }
+            p.run().waitUntilFinish();
         }
 
-        // PCollection<Crime> crimes = neighbourhoodBoundries.apply(new
-        // ReadCrimes(App.apiPoliceUrl));
-        // crimes.apply(new WriteToES<Crime>(elasticSearchUrl));
-
-        p.run().waitUntilFinish();
     }
 }

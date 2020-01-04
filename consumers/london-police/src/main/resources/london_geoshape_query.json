@@ -1,0 +1,42 @@
+{
+    "size": 10000,
+    "query": {
+        "bool": {
+            "filter": {
+                "geo_shape": {
+                    "ignore_unmapped": true,
+                    "geoShape": {
+                        "relation": "INTERSECTS",
+                        "shape": {
+                            "type": "Polygon",
+                            "coordinates": [
+                                [
+                                    [
+                                        -0.5,
+                                        51.7
+                                    ],
+                                    [
+                                        -0.5,
+                                        51.3
+                                    ],
+                                    [
+                                        0.2,
+                                        51.3
+                                    ],
+                                    [
+                                        0.2,
+                                        51.7
+                                    ],
+                                    [
+                                        -0.5,
+                                        51.7
+                                    ]
+                                ]
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

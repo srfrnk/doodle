@@ -6,12 +6,12 @@ import com.google.gson.annotations.SerializedName;
 import common.Helper;
 import common.Elasticsearch.ESDoc;
 
-public class NeighbourhoodBoundry extends ESDoc {
-    public NeighbourhoodBoundry() {
-        super("neighbourhood_boundries");
-    }
-
+public class NeighbourhoodBoundary extends ESDoc {
     private static final long serialVersionUID = 1L;
+
+    public NeighbourhoodBoundary() {
+        super("neighbourhood_boundaries");
+    }
 
     public static class Point implements Serializable {
         private static final long serialVersionUID = 1L;
@@ -21,6 +21,9 @@ public class NeighbourhoodBoundry extends ESDoc {
 
         @SerializedName("lon")
         double longitude;
+
+        public Point() {
+        }
 
         public Point(double latitude, double longitude) {
             this.latitude = latitude;
@@ -43,6 +46,9 @@ public class NeighbourhoodBoundry extends ESDoc {
 
         @SerializedName("coordinates")
         double[][] coordinates;
+
+        public Shape() {
+        }
 
         public Shape(Point[] coordinates) {
             this.coordinates = new double[coordinates.length][];
@@ -73,7 +79,7 @@ public class NeighbourhoodBoundry extends ESDoc {
 
     @Override
     public boolean equals(Object obj) {
-        NeighbourhoodBoundry other = (NeighbourhoodBoundry) obj;
+        NeighbourhoodBoundary other = (NeighbourhoodBoundary) obj;
 
         return other != null && Arrays.equals(this.points, other.points)
                 && Helper.objectEquals(this.geoShape, other.geoShape)
