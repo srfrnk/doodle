@@ -1,7 +1,6 @@
 package london_police;
 
 import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.transforms.Sample;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
@@ -21,7 +20,6 @@ public class UpdateCrimes extends PTransform<PBegin, PDone> {
     public PDone expand(PBegin input) {
         PCollection<NeighbourhoodBoundary> neighbourhoodBoundaries =
                 input.apply(new LoadNeighbourhoodBoundaries(this.elasticSearchUrl));
-        neighbourhoodBoundaries = neighbourhoodBoundaries.apply(Sample.any(1));
         PCollection<Crime> crimes =
                 neighbourhoodBoundaries.apply(new ReadCrimes(this.apiPoliceUrl));
         return crimes.apply(new WriteToES<Crime>(this.elasticSearchUrl));

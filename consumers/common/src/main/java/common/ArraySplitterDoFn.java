@@ -20,7 +20,6 @@ public class ArraySplitterDoFn<T extends Serializable> extends DoFn<T[], T> {
         int numSplits = getNumSplits(array);
         long from = tracker.currentRestriction().getFrom();
         long to = tracker.currentRestriction().getTo();
-        LOG.info(String.format("Process %d", from));
         for (long i = from; i < to; i++) {
             tracker.tryClaim(i);
             for (int j = (int) i; j < array.length; j += numSplits) {
@@ -30,13 +29,13 @@ public class ArraySplitterDoFn<T extends Serializable> extends DoFn<T[], T> {
     }
 
     private int getNumSplits(T[] array) {
-        return (int) Math.min(100, Math.max(1, (Math.log10(array.length) * 10)));
+        return (int) (Math.log10(array.length + 1) * 10) + 1;
     }
 
     @GetInitialRestriction
     public OffsetRange getInitialRestriction(T[] array) {
         int numSplits = getNumSplits(array);
-        LOG.info(String.format("Splitting to %d", numSplits));
+        LOG.debug(String.format("Splitting to %d", numSplits));
         return new OffsetRange(0, numSplits);
     }
 
@@ -47,6 +46,5 @@ public class ArraySplitterDoFn<T extends Serializable> extends DoFn<T[], T> {
         for (long i = 0; i < numSplits; i++) {
             receiver.output(new OffsetRange(i, i + 1));
         }
-        LOG.info("Splits Done");
     }
 }

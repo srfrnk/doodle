@@ -4,7 +4,6 @@
         "bool": {
             "filter": {
                 "geo_shape": {
-                    "ignore_unmapped": true,
                     "geoShape": {
                         "relation": "INTERSECTS",
                         "shape": {
