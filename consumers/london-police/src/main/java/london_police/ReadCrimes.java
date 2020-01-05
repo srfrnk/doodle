@@ -5,58 +5,50 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.net.MediaType;
-import org.apache.beam.sdk.coders.AvroCoder;
-import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import common.ArraySplitterDoFn;
+import common.BundledParDo;
 import common.WebClient.WebResponseException;
 import london_police.NeighbourhoodBoundary.Point;
 
-public class ReadCrimes extends PTransform<PCollection<NeighbourhoodBoundary>, PCollection<Crime>> {
+public class ReadCrimes extends BundledParDo<NeighbourhoodBoundary, Crime> {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(ReadCrimes.class);
-    private String apiPoliceUrl;
 
     public ReadCrimes(String apiPoliceUrl) {
-        this.apiPoliceUrl = apiPoliceUrl;
+        super(new ReadCrimesBundler(apiPoliceUrl), new Crime[0]);
     }
 
-    @Override
-    public PCollection<Crime> expand(PCollection<NeighbourhoodBoundary> input) {
-        return input.apply("Read Crimes", ParDo.of(new ReadCrimesDoFn(this.apiPoliceUrl)))
-                .setCoder(AvroCoder.of(Crime[].class))
-                .apply("Split Crimes", ParDo.of(new ArraySplitterDoFn<Crime>()));
-    }
-
-    private static class ReadCrimesDoFn extends DoFn<NeighbourhoodBoundary, Crime[]> {
+    private static class ReadCrimesBundler extends ArrayBundler<NeighbourhoodBoundary, Crime> {
         private static final long serialVersionUID = 1L;
         private String apiPoliceUrl;
 
-        public ReadCrimesDoFn(String apiPoliceUrl) {
+        public ReadCrimesBundler(String apiPoliceUrl) {
+            super(10);
             this.apiPoliceUrl = apiPoliceUrl;
         }
 
-        @ProcessElement
-        public void processElement(@Element NeighbourhoodBoundary boundry,
-                OutputReceiver<Crime[]> output)
-                throws IOException, InterruptedException, WebResponseException {
-            LOG.info(String.format("Reading: %s -> %s", boundry.neighbourhood.force.name,
-                    boundry.neighbourhood.name));
-            List<Point> points = Arrays.asList(boundry.points);
-            String boundryString = String.join(":", points.stream()
-                    .map((Point point) -> String.format("%s,%s", point.latitude, point.longitude))
-                    .collect(Collectors.toList()));
-            CrimeResponse[] crimes = ApiReader.postJson(
-                    String.format("%s/crimes-street/all-crime", this.apiPoliceUrl),
-                    String.format("poly=%s", boundryString), MediaType.FORM_DATA,
-                    CrimeResponse[].class);
-            output.output(Arrays.asList(crimes).stream()
-                    .map(crime -> new Crime(crime.location.latitude, crime.location.longitude))
-                    .collect(Collectors.toList()).toArray(new Crime[0]));
+        @Override
+        public Crime[] getDataArray(NeighbourhoodBoundary boundary) {
+            try {
+                LOG.info(String.format("Reading: %s -> %s", boundary.neighbourhood.force.name,
+                        boundary.neighbourhood.name));
+                List<Point> points = Arrays.asList(boundary.points);
+                String boundryString = String.join(":", points.stream().map(
+                        (Point point) -> String.format("%s,%s", point.latitude, point.longitude))
+                        .collect(Collectors.toList()));
+                CrimeResponse[] crimeResponses = ApiReader.postJson(
+                        String.format("%s/crimes-street/all-crime", this.apiPoliceUrl),
+                        String.format("poly=%s", boundryString), MediaType.FORM_DATA,
+                        CrimeResponse[].class);
+                Crime[] crimes = (Arrays.asList(crimeResponses).stream()
+                        .map(crime -> new Crime(crime.location.latitude, crime.location.longitude))
+                        .collect(Collectors.toList()).toArray(new Crime[0]));
+                return crimes;
+            } catch (IOException | InterruptedException | WebResponseException e) {
+                LOG.error("Read", e);
+                return new Crime[0];
+            }
         }
     }
 }
