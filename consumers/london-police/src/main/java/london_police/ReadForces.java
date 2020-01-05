@@ -1,18 +1,16 @@
 package london_police;
 
 import java.io.IOException;
-import java.io.Serializable;
-import org.apache.beam.sdk.coders.AvroCoder;
+import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.SerializableCoder;
-import org.apache.beam.sdk.options.ValueProvider;
-import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.io.Read;
+import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import common.ArraySplitterDoFn;
+import common.ReadAllAndSplitSource;
 import common.WebClient.WebResponseException;
 
 public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
@@ -26,24 +24,21 @@ public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
 
     @Override
     public PCollection<ForceResponse> expand(PBegin input) {
-        return input
-                .apply("Read Forces",
-                        Create.ofProvider(new ReadForcesProvider(this.apiPoliceUrl),
-                                AvroCoder.of(ForceResponse[].class)))
-                .apply("Split Forces", ParDo.of(new ArraySplitterDoFn<ForceResponse>()));
+        return input.apply("Read Forces", Read.from(new ForcesSource(this.apiPoliceUrl)));
     }
 
-    private static class ReadForcesProvider
-            implements ValueProvider<ForceResponse[]>, Serializable {
+    private static class ForcesSource extends ReadAllAndSplitSource<ForceResponse> {
         private static final long serialVersionUID = 1L;
         private String apiPoliceUrl;
 
-        public ReadForcesProvider(String apiPoliceUrl) {
+        public ForcesSource(String apiPoliceUrl) {
+            super(10);
             this.apiPoliceUrl = apiPoliceUrl;
         }
 
         @Override
-        public ForceResponse[] get() {
+        public ForceResponse[] getDataArray(PipelineOptions options) {
+
             LOG.info(String.format("Reading..."));
             ForceResponse[] forces;
             try {
@@ -52,13 +47,18 @@ public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
                 return forces;
             } catch (WebResponseException | IOException | InterruptedException e) {
                 LOG.error("Error reading forces:", e);
-                return null;
+                return new ForceResponse[0];
             }
         }
 
         @Override
-        public boolean isAccessible() {
-            return true;
+        public long getEstimatedSizeBytes(PipelineOptions options) throws Exception {
+            return 0L;
+        }
+
+        @Override
+        public Coder<ForceResponse> getOutputCoder() {
+            return SerializableCoder.of(ForceResponse.class);
         }
     }
 }

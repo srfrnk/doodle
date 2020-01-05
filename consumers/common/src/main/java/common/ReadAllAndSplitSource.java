@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.io.BoundedSource;
 import org.apache.beam.sdk.options.PipelineOptions;
 
@@ -32,6 +33,9 @@ public abstract class ReadAllAndSplitSource<T extends Serializable> extends Boun
     }
 
     public abstract T[] getDataArray(PipelineOptions options);
+
+    @Override
+    public abstract Coder<T> getOutputCoder();
 
     @Override
     public BoundedReader<T> createReader(PipelineOptions options) throws IOException {
