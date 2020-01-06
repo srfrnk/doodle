@@ -15,9 +15,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
+import { AgmCoreModule } from '@agm/core';
+import { MapComponent } from './map/map.component';
+
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    MapComponent
   ],
   imports: [
     BrowserModule,
@@ -32,6 +36,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
+    AgmCoreModule.forRoot({
+      // please get your own API key here:
+      // https://developers.google.com/maps/documentation/javascript/get-api-key?hl=en
+      apiKey: 'AIzaSyBuK1M6y6TU2TKv8cG-OTDScbVltTOTGiw'
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]
