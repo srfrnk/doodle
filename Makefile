@@ -16,3 +16,6 @@ start-db: FORCE
 
 stop-db: FORCE
 	docker kill elasticsearch kibana
+
+start-ui: FORCE
+	cd frontend && ng serve --open
