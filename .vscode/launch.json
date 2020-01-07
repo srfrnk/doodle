@@ -19,6 +19,30 @@
             "mainClass": "london_police.App",
             "projectName": "london-police",
             "args": "crimes"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Frontend",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/frontend",
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Api Server",
+            "runtimeExecutable": "~/.nvm/versions/node/v11.15.0/bin/node",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register",
+            ],
+            "args": [
+                "index.ts"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "cwd": "${workspaceFolder}/api"
         }
     ]
 }

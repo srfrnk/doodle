@@ -19,3 +19,6 @@ stop-db: FORCE
 
 start-ui: FORCE
 	cd frontend && ng serve --open
+
+start-api: FORCE
+	cd api && npm start
