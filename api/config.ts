@@ -1,23 +1,17 @@
 import { Logger } from '@overnightjs/logger';
 
-class Config {
+export default class Config {
     public readonly jwtSecret: string = '';
+    public readonly elasticsearchUrl: string = '';
 
-    constructor(config: Partial<Config>) {
+    private constructor(config: Partial<Config>) {
         Object.assign(this, config);
     }
-}
 
-let config: Config;
-
-function initConfig() {
-    if (!config) {
+    public static init(): Config {
         const envName = process.env.env || 'local';
         Logger.Imp(`Using env ${envName}`);
         const envConfig = require(`./env/${envName}.ts`);
-        config = new Config(envConfig);
+        return new Config(envConfig);
     }
-    return config;
 }
-
-export default initConfig;
