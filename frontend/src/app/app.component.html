@@ -4,8 +4,7 @@
   <mat-menu #layers="matMenu">
     <button mat-menu-item>
       <span>Crimes</span>
-      <mat-slider min="0" max="100" step="1" [(ngModel)]="map.crimesOpacity" (input)="map.crimesOpacity=$event.value">
-      </mat-slider>
+      <mat-slider min="0" max="100" step="1" (input)="map.layers['crimes'].opacity=$event.value"></mat-slider>
     </button>
   </mat-menu>
   <span class=" fill-remaining-space"></span>
