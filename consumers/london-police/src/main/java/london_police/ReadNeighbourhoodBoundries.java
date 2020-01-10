@@ -27,7 +27,8 @@ public class ReadNeighbourhoodBoundries
 
     @Override
     public PCollection<NeighbourhoodBoundary> expand(PCollection<Neighbourhood> input) {
-        return input.apply("Read Boundries", ParDo.of(new ReadBoundriesDoFn(this.apiPoliceUrl)));
+        return input.apply("Read Boundries",
+                ParDo.of(new ReadBoundriesDoFn(this.apiPoliceUrl)));
     }
 
     private static class ReadBoundriesDoFn extends DoFn<Neighbourhood, NeighbourhoodBoundary> {
@@ -42,8 +43,9 @@ public class ReadNeighbourhoodBoundries
         public void processElement(@Element Neighbourhood neighbourhood,
                 OutputReceiver<NeighbourhoodBoundary> output)
                 throws WebResponseException, IOException, InterruptedException {
-            LOG.info(String.format("Reading: %s -> %s", neighbourhood.force.name, neighbourhood.name));
-            NeighbourhoodBoundryResponse.Point[] points = ApiReader.getJson(
+            LOG.info(String.format("Reading: %s -> %s", neighbourhood.force.name,
+                    neighbourhood.name));
+            NeighbourhoodBoundryResponse.Point[] points = App.apiReader.getJson(
                     String.format("%s/%s/%s/boundary", this.apiPoliceUrl,
                             WebClient.urlEncode(neighbourhood.force.id),
                             WebClient.urlEncode(neighbourhood.id)),

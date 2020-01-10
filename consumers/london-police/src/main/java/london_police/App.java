@@ -12,12 +12,17 @@ import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import common.ApiReader;
 import common.Elasticsearch;
 
 public class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     public static String apiPoliceUrl = "https://data.police.uk/api";
     public static String elasticSearchUrl = "http://localhost:9200";
+    public static ApiReader apiReader = new ApiReader(15); // This will break idempotency of
+                                                           // transforms but since running within
+                                                           // same process it can still be safely
+                                                           // used.
 
     public static void main(String[] args) throws URISyntaxException, IOException {
         if (args.length < 1) {

@@ -3,6 +3,7 @@ package london_police;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import common.ApiReader;
 import common.WriteToES;
 
 public class UpdateNeighbourhoodBoundaries
@@ -19,11 +20,12 @@ public class UpdateNeighbourhoodBoundaries
 
     @Override
     public PCollection<NeighbourhoodBoundary> expand(PBegin input) {
-        PCollection<ForceResponse> forces = input.apply(new ReadForces(this.apiPoliceUrl));
+        PCollection<ForceResponse> forces =
+                input.apply(new ReadForces(this.apiPoliceUrl));
         PCollection<Neighbourhood> neighbourhoods =
                 forces.apply(new ReadNeighbourhoods(this.apiPoliceUrl));
-        PCollection<NeighbourhoodBoundary> neighbourhoodBoundries =
-                neighbourhoods.apply(new ReadNeighbourhoodBoundries(this.apiPoliceUrl));
+        PCollection<NeighbourhoodBoundary> neighbourhoodBoundries = neighbourhoods
+                .apply(new ReadNeighbourhoodBoundries(this.apiPoliceUrl));
         neighbourhoodBoundries.apply(new WriteToES<NeighbourhoodBoundary>(this.elasticSearchUrl));
         return neighbourhoodBoundries;
     }

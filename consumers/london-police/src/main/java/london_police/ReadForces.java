@@ -24,7 +24,8 @@ public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
 
     @Override
     public PCollection<ForceResponse> expand(PBegin input) {
-        return input.apply("Read Forces", Read.from(new ForcesSource(this.apiPoliceUrl)));
+        return input.apply("Read Forces",
+                Read.from(new ForcesSource(this.apiPoliceUrl)));
     }
 
     private static class ForcesSource extends ReadAllAndSplitSource<ForceResponse> {
@@ -42,7 +43,7 @@ public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
             LOG.info(String.format("Reading..."));
             ForceResponse[] forces;
             try {
-                forces = ApiReader.getJson(String.format("%s/forces", this.apiPoliceUrl),
+                forces = App.apiReader.getJson(String.format("%s/forces", this.apiPoliceUrl),
                         ForceResponse[].class);
                 return forces;
             } catch (WebResponseException | IOException | InterruptedException e) {

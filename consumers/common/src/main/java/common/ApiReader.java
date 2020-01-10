@@ -1,4 +1,4 @@
-package london_police;
+package common;
 
 import java.io.IOException;
 import com.google.common.net.MediaType;
@@ -10,13 +10,17 @@ import common.WebClient.WebResponseException;
 
 public class ApiReader {
     private static final Logger LOG = LoggerFactory.getLogger(ApiReader.class);
-    private static final RateLimiter rateLimiter = RateLimiter.create(15);
+    private RateLimiter rateLimiter;
 
-    public static <T> T getJson(String url, Class<T> clazz)
+    public ApiReader(int qps) {
+        this.rateLimiter = RateLimiter.create(qps);
+    }
+
+    public <T> T getJson(String url, Class<T> clazz)
             throws WebResponseException, IOException, InterruptedException {
         while (true) {
             try {
-                ApiReader.rateLimiter.acquire();
+                this.rateLimiter.acquire();
                 return WebClient.getJson(url, clazz);
             } catch (WebResponseException e) {
                 if (e.statusCode != 429) {
@@ -26,11 +30,11 @@ public class ApiReader {
         }
     }
 
-    public static <T> T postJson(String url, String data, MediaType contentType, Class<T> clazz)
+    public <T> T postJson(String url, String data, MediaType contentType, Class<T> clazz)
             throws IOException, InterruptedException, WebResponseException {
         while (true) {
             try {
-                ApiReader.rateLimiter.acquire();
+                this.rateLimiter.acquire();
                 return WebClient.postJson(url, data, contentType, clazz);
             } catch (WebResponseException e) {
                 if (e.statusCode != 429) {
