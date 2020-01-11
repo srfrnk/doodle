@@ -12,7 +12,7 @@ public class ApiReader {
     private static final Logger LOG = LoggerFactory.getLogger(ApiReader.class);
     private RateLimiter rateLimiter;
 
-    public ApiReader(int qps) {
+    public ApiReader(double qps) {
         this.rateLimiter = RateLimiter.create(qps);
     }
 

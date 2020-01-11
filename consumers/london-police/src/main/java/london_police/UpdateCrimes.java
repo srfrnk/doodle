@@ -21,7 +21,7 @@ public class UpdateCrimes extends PTransform<PBegin, PDone> {
         PCollection<NeighbourhoodBoundary> neighbourhoodBoundaries =
                 input.apply(new LoadNeighbourhoodBoundaries(this.elasticSearchUrl));
         PCollection<Crime> crimes =
-                neighbourhoodBoundaries.apply(new ReadCrimes(this.apiPoliceUrl, App.apiReader));
+                neighbourhoodBoundaries.apply(new ReadCrimes(this.apiPoliceUrl));
         return crimes.apply(new WriteToES<Crime>(this.elasticSearchUrl));
     }
 }
