@@ -21,6 +21,16 @@
             "args": "crimes"
         },
         {
+            "type": "java",
+            "name": "Zoopla Consumer Rentals",
+            "request": "launch",
+            "mainClass": "zoopla.App",
+            "projectName": "zoopla",
+            "env": {
+                "API_KEY_ZOOPLA": ""
+            }
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Frontend",

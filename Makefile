@@ -8,6 +8,10 @@ consume-london-police-boundaries: FORCE
 	clear
 	gradle -p consumers/london-police run --args="boundaries"
 
+consume-zoopla: FORCE
+	clear
+	gradle -p consumers/zoopla run
+
 start-db: FORCE
 	docker run -p 9200:9200 -p 9300:9300 --rm -d --name elasticsearch -e "discovery.type=single-node" \
 		--mount type=bind,source=$$(pwd)/data,target=/usr/share/elasticsearch/data \

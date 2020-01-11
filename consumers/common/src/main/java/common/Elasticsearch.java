@@ -187,5 +187,34 @@ public class Elasticsearch {
       ESDoc other = (ESDoc) obj;
       return other != null && Helper.objectEquals(this.index, other.index);
     }
+
+    public static class Location implements Serializable {
+      private static final long serialVersionUID = 1L;
+
+      public Location() {
+      }
+
+      public Location(String latitude, String longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+      }
+
+      public Location(double latitude, double longitude) {
+        this(Double.toString(latitude), Double.toString(longitude));
+      }
+
+      @SerializedName("lat")
+      public String latitude;
+
+      @SerializedName("lon")
+      public String longitude;
+
+      @Override
+      public boolean equals(Object obj) {
+        Location other = (Location) obj;
+        return other != null && Helper.objectEquals(this.latitude, other.latitude)
+            && Helper.objectEquals(this.longitude, other.longitude);
+      }
+    }
   }
 }
