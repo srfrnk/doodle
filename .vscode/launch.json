@@ -21,6 +21,13 @@
             "args": "crimes"
         },
         {
+            "type": "java",
+            "name": "Nestoria Consumer",
+            "request": "launch",
+            "mainClass": "nestoria.App",
+            "projectName": "nestoria"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "Frontend",

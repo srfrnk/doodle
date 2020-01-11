@@ -15,6 +15,10 @@ public class Helper {
         return value == null ? defaultValue : value;
     }
 
+    public static String checkString(String value, String defaultValue) {
+        return value == null || value.length() == 0 ? defaultValue : value;
+    }
+
     public static String readResource(String name) throws URISyntaxException, IOException {
         var uri = Helper.class.getResource("/" + name).toURI();
         var path = Paths.get(uri);

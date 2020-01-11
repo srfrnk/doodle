@@ -1,38 +1,37 @@
 package common;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.io.BoundedSource;
 import org.apache.beam.sdk.options.PipelineOptions;
 
-public abstract class ReadAllAndSplitSource<T> extends BoundedSource<T> {
+public abstract class SplitReadersSource<T, S> extends BoundedSource<T> {
     private static final long serialVersionUID = 1L;
-    private int splitSize;
 
-    public ReadAllAndSplitSource(int splitSize) {
-        this.splitSize = splitSize;
+    public SplitReadersSource() {
     }
 
     @Override
     public List<? extends BoundedSource<T>> split(long desiredBundleSizeBytes,
             PipelineOptions options) throws Exception {
-        ArrayList<SplitSource<T>> splits = new ArrayList<>();
-        int from = 0;
-        T[] dataArray = getDataArray(options);
-        while (from < dataArray.length) {
-            int to = Math.min(dataArray.length, from + this.splitSize);
-            SplitSource<T> source = new SplitSource<>(dataArray, from, to);
+        ArrayList<SplitSource<T, S>> splits = new ArrayList<>();
+        S[] splitsData = getSplitArray(options);
+        for (S splitData : splitsData) {
+            SplitSource<T, S> source = new SplitSource<T, S>(splitData, (_splitData) -> {
+                return this.readSplit(_splitData);
+            });
             splits.add(source);
-            from = to;
         }
         return splits;
     }
 
-    public abstract T[] getDataArray(PipelineOptions options);
+    public abstract S[] getSplitArray(PipelineOptions options);
+
+    public abstract T[] readSplit(S splitData);
 
     @Override
     public abstract Coder<T> getOutputCoder();
@@ -42,12 +41,12 @@ public abstract class ReadAllAndSplitSource<T> extends BoundedSource<T> {
         return null;
     }
 
-    private static class SplitSource<T> extends BoundedSource<T> {
+    private static class SplitSource<T, S> extends BoundedSource<T> {
         private static final long serialVersionUID = 1L;
-        private SplitReader<T> reader;
+        private SplitReader<T, S> reader;
 
-        public SplitSource(T[] dataArray, int from, int to) {
-            this.reader = new SplitReader<>(this, dataArray, from, to);
+        public SplitSource(S splitData, Function<S, T[]> readSplit) {
+            this.reader = new SplitReader<>(this, splitData, readSplit);
         }
 
         @Override
@@ -67,18 +66,17 @@ public abstract class ReadAllAndSplitSource<T> extends BoundedSource<T> {
         }
     }
 
-    private static class SplitReader<T> extends BoundedReader<T> {
-        private SplitSource<T> source;
-        private T[] dataArray;
-        private int from;
-        private int to;
+    private static class SplitReader<T, S> extends BoundedReader<T> {
+        private SplitSource<T, S> source;
+        private S splitData;
+        private T[] data;
         private int current;
+        private Function<S, T[]> readSplit;
 
-        public SplitReader(SplitSource<T> source, T[] dataArray, int from, int to) {
+        public SplitReader(SplitSource<T, S> source, S splitData, Function<S, T[]> readSplit) {
             this.source = source;
-            this.dataArray = dataArray;
-            this.from = from;
-            this.to = to;
+            this.splitData = splitData;
+            this.readSplit = readSplit;
         }
 
         @Override
@@ -88,25 +86,26 @@ public abstract class ReadAllAndSplitSource<T> extends BoundedSource<T> {
 
         @Override
         public boolean start() throws IOException {
-            this.current = from;
-            return true;
+            this.data = this.readSplit.apply(this.splitData);
+            this.current = 0;
+            return this.data != null && this.data.length > 0;
         }
 
         @Override
         public boolean advance() throws IOException {
             this.current++;
-            return this.current < this.to;
+            return this.current < this.data.length;
         }
 
         @Override
         public T getCurrent() throws NoSuchElementException {
-            return this.dataArray[this.current];
+            return this.data[this.current];
         }
 
         @Override
         public void close() throws IOException {
             this.current = 0;
-            this.dataArray = null;
+            this.data = null;
         }
     }
 }
