@@ -37,19 +37,25 @@ export class MapComponent implements OnInit {
       const crimes = await this.api.crimes().toPromise();
       const layer = new google.maps.visualization.HeatmapLayer({
         map: this.map,
-        radius: 50,
+        radius: 10,
         opacity: 0.0,
+        maxIntensity: 300,
         gradient: [
           'rgba(255, 0, 0, 0)',
           'rgba(255, 0, 0, 1)',
+          'rgba(150, 0, 0, 1)',
+          'rgba(100, 0, 0, 1)',
+          'rgba(50, 0, 0, 1)',
+          'rgba(20, 0, 0, 1)',
+          'rgba(00, 0, 0, 1)'
         ],
-        data: crimes.map(crime => ({ location: new google.maps.LatLng(crime.lat, crime.lon), weight: 1 }))
+        data: crimes.map(crime => (new google.maps.LatLng(crime.lat, crime.lon)))
       });
       return layer;
     })
   };
 
-  zoom = 14;
+  zoom = 11;
   lat = 51.51;
   lng = -0.12;
 
