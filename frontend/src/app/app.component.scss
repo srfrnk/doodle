@@ -5,3 +5,13 @@
 .menu {
   text-decoration: underline;
 }
+
+.nestoria-badge {
+  transform: scale(0.7);
+}
+
+.layer-menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}

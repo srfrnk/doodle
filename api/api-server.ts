@@ -4,6 +4,7 @@ import * as cors from 'cors';
 import { Server } from '@overnightjs/core';
 import { Logger } from '@overnightjs/logger';
 import UkPoliceController from './controllers/uk-police-controller';
+import RentalHomesController from './controllers/rental-homes';
 
 export default class ChargerServer extends Server {
     constructor() {
@@ -17,7 +18,7 @@ export default class ChargerServer extends Server {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: true }));
 
-        super.addControllers([new UkPoliceController()]);
+        super.addControllers([new UkPoliceController(),new RentalHomesController()]);
     }
 
     public start(port: number): void {

@@ -16,7 +16,7 @@ import { MatInputModule } from '@angular/material';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
-import { AgmCoreModule } from '@agm/core';
+import { AgmCoreModule, GoogleMapsAPIWrapper, DataLayerManager } from '@agm/core';
 import { MapComponent } from './map/map.component';
 
 @NgModule({
@@ -39,13 +39,11 @@ import { MapComponent } from './map/map.component';
     MatFormFieldModule,
     MatCheckboxModule,
     AgmCoreModule.forRoot({
-      // please get your own API key here:
-      // https://developers.google.com/maps/documentation/javascript/get-api-key?hl=en
       apiKey: 'AIzaSyBuK1M6y6TU2TKv8cG-OTDScbVltTOTGiw',
       libraries: ['visualization'],
     })
   ],
-  providers: [],
+  providers: [GoogleMapsAPIWrapper, DataLayerManager],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
