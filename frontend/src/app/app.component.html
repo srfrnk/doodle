@@ -2,13 +2,19 @@
   <span>Doodle</span>
   <button mat-button [matMenuTriggerFor]="layers" class="menu">Layers</button>
   <mat-menu #layers="matMenu">
-    <button mat-menu-item>
+    <button mat-menu-item class="layer-menu">
       <span>Crimes</span>
-      <mat-slider min="0" max="100" step="1" (input)="map.layers['crimes'].opacity=$event.value"></mat-slider>
+      <mat-slider min="0" max="100" step="1" (input)="map.layers.crimes.opacity=$event.value"></mat-slider>
+    </button>
+    <button mat-menu-item class="layer-menu">
+      <span>Home Rental Prices</span>
+      <mat-slider min="0" max="100" step="1" (input)="map.layers.homeRentalPrices.opacity=$event.value"></mat-slider>
     </button>
   </mat-menu>
   <span class=" fill-remaining-space"></span>
-  <span>
-    <a href="https://github.com/srfrnk/doodle" target="_blank"><img src="./assets/github.png" /></a></span>
+  <span class="nestoria-badge"><a href="https://www.nestoria.co.uk" target="_blank"><img
+        src="https://resources.nestimg.com/nestoria/img/pbr_v1.png" alt="powered by nestoria.co.uk" width="200"
+        height="22" style="border:0; padding:0px;" /></a></span>
+  <span><a href="https://github.com/srfrnk/doodle" target="_blank"><img src="./assets/github.png" /></a></span>
 </mat-toolbar>
 <app-map #map></app-map>

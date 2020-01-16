@@ -52,6 +52,29 @@ export class MapComponent implements OnInit {
         data: crimes.map(crime => (new google.maps.LatLng(crime.lat, crime.lon)))
       });
       return layer;
+    }),
+    homeRentalPrices: new Layer(async () => {
+      const homeRentalPrices = await this.api.homeRentalPrices().toPromise();
+      const layer = new google.maps.visualization.HeatmapLayer({
+        map: this.map,
+        radius: 10,
+        opacity: 0.0,
+        maxIntensity: 300,
+        gradient: [
+          'rgba(0, 0, 255, 0)',
+          'rgba(0, 0, 255, 1)',
+          'rgba(0, 0, 150, 1)',
+          'rgba(0, 0, 100, 1)',
+          'rgba(0, 0, 50, 1)',
+          'rgba(0, 0, 20, 1)',
+          'rgba(0, 0, 00, 1)'
+        ],
+        data: homeRentalPrices.map(homeRentalPrice => ({
+          location: new google.maps.LatLng(homeRentalPrice.lat, homeRentalPrice.lon),
+          weight: homeRentalPrice.weight
+        }))
+      });
+      return layer;
     })
   };
 
