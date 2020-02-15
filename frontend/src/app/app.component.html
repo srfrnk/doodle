@@ -4,11 +4,11 @@
   <mat-menu #layers="matMenu">
     <button mat-menu-item class="layer-menu">
       <span>Crimes</span>
-      <mat-slider min="0" max="100" step="1" (input)="map.layers.crimes.opacity=$event.value"></mat-slider>
+      <mat-slider min="0" max="100" step="1" (input)="map.crimes.setOpacity($event.value)"></mat-slider>
     </button>
     <button mat-menu-item class="layer-menu">
       <span>Home Rental Prices</span>
-      <mat-slider min="0" max="100" step="1" (input)="map.layers.homeRentalPrices.opacity=$event.value"></mat-slider>
+      <mat-slider min="0" max="100" step="1" (input)="map.homeRentalPrices.setOpacity($event.value)"></mat-slider>
     </button>
   </mat-menu>
   <span class=" fill-remaining-space"></span>

@@ -1,3 +1,7 @@
-<agm-map [latitude]="lat" [longitude]="lng" [zoom]="zoom" [disableDefaultUI]="false" [zoomControl]="true"
-  (mapReady)="onMapLoad($event)">
-</agm-map>
+<div id="map" leaflet [leafletOptions]="mapOptions" (leafletMapReady)="onMapReady($event)" [(leafletZoom)]="mapZoom"
+  [(leafletCenter)]="mapCenter">
+  <div [leafletHexbin]="crimes.data" [leafletHexbinOptions]="crimes.options"
+    (leafletHexbinLayerReady)="crimes.ready($event)"></div>
+  <div [leafletHexbin]="homeRentalPrices.data" [leafletHexbinOptions]="homeRentalPrices.options"
+    (leafletHexbinLayerReady)="homeRentalPrices.ready($event)"></div>
+</div>

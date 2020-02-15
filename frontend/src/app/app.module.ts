@@ -16,7 +16,9 @@ import { MatInputModule } from '@angular/material';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
-import { AgmCoreModule, GoogleMapsAPIWrapper, DataLayerManager } from '@agm/core';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import { LeafletD3Module } from '@asymmetrik/ngx-leaflet-d3';
+
 import { MapComponent } from './map/map.component';
 
 @NgModule({
@@ -38,12 +40,10 @@ import { MapComponent } from './map/map.component';
     MatInputModule,
     MatFormFieldModule,
     MatCheckboxModule,
-    AgmCoreModule.forRoot({
-      apiKey: 'AIzaSyBuK1M6y6TU2TKv8cG-OTDScbVltTOTGiw',
-      libraries: ['visualization'],
-    })
+    LeafletModule.forRoot(),
+    LeafletD3Module.forRoot()
   ],
-  providers: [GoogleMapsAPIWrapper, DataLayerManager],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
