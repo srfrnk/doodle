@@ -37,7 +37,7 @@ public class UpdateCrimes extends PTransform<PBegin, PDone> {
                 neighbourhoodBoundaries.apply(new ReadCrimes(this.apiPoliceUrl));
 
         return crimes.apply(MapElements.into(TypeDescriptors.strings()).via((c) -> Json.format(c)))
-                .apply(TextIO.write().to("./data/d.json").withWindowedWrites());
+                .apply(TextIO.write().to("./data/d.json"));
         // return crimes.apply(new WriteToES<Crime>(this.elasticSearchUrl));
     }
 }

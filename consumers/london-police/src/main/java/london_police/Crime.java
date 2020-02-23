@@ -32,6 +32,10 @@ public class Crime extends ESDoc {
     public boolean equals(Object obj) {
         Crime other = (Crime) obj;
         return other != null && super.equals(obj)
-                && Helper.objectEquals(this.location, other.location);
+                && Helper.objectEquals(this.neighbourhoodBoundary, other.neighbourhoodBoundary)
+                && Helper.objectEquals(this.location, other.location)
+                && Helper.objectEquals(this.month, other.month)
+                && Helper.objectEquals(this.category, other.category)
+                && Helper.objectEquals(this.postcode, other.postcode);
     }
 }

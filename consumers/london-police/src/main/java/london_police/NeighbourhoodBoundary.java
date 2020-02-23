@@ -81,7 +81,8 @@ public class NeighbourhoodBoundary extends ESDoc {
     public boolean equals(Object obj) {
         NeighbourhoodBoundary other = (NeighbourhoodBoundary) obj;
 
-        return other != null && Arrays.equals(this.points, other.points)
+        return other != null && Arrays.deepEquals(this.points, other.points)
+                && Helper.objectEquals(this.center, other.center)
                 && Helper.objectEquals(this.geoShape, other.geoShape)
                 && Helper.objectEquals(this.neighbourhood, other.neighbourhood);
 
