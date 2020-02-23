@@ -3,7 +3,6 @@ package london_police;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
-import common.ApiReader;
 import common.WriteToES;
 
 public class UpdateNeighbourhoodBoundaries

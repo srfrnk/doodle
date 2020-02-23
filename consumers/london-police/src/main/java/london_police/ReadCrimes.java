@@ -8,6 +8,8 @@ import com.google.common.net.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import common.BundledParDo;
+import common.PostCodeReader;
+import common.Elasticsearch.ESDoc.Location;
 import common.WebClient.WebResponseException;
 import london_police.NeighbourhoodBoundary.Point;
 
@@ -37,13 +39,25 @@ public class ReadCrimes extends BundledParDo<NeighbourhoodBoundary, Crime> {
                 String boundryString = String.join(":", points.stream().map(
                         (Point point) -> String.format("%s,%s", point.latitude, point.longitude))
                         .collect(Collectors.toList()));
-                CrimeResponse[] crimeResponses = App.apiReader.postJson(
+                CrimeResponse[] crimeResponses = App.apiReaderUKPolice.postJson(
                         String.format("%s/crimes-street/all-crime", this.apiPoliceUrl),
                         String.format("poly=%s", boundryString), MediaType.FORM_DATA,
                         CrimeResponse[].class);
-                Crime[] crimes = (Arrays.asList(crimeResponses).stream()
-                        .map(crime -> new Crime(crime.location.latitude, crime.location.longitude))
-                        .collect(Collectors.toList()).toArray(new Crime[0]));
+                Crime[] crimes = (Arrays.asList(crimeResponses).stream().map(crimeResponse -> {
+                    Crime crime = new Crime();
+                    crime.neighbourhoodBoundary = boundary;
+                    crime.location = new Location(crimeResponse.location.latitude,
+                            crimeResponse.location.longitude);
+                    try {
+                        crime.postcode = PostCodeReader.read(App.apiReaderPostCode,
+                                crimeResponse.location.latitude, crimeResponse.location.longitude);
+                    } catch (WebResponseException | IOException | InterruptedException e) {
+                        LOG.error("Get postcode", e);
+                    }
+                    crime.month = crimeResponse.month;
+                    crime.category = crimeResponse.category;
+                    return crime;
+                }).collect(Collectors.toList()).toArray(new Crime[0]));
                 return crimes;
             } catch (IOException | InterruptedException | WebResponseException e) {
                 LOG.error("Read", e);

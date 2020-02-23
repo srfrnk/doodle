@@ -10,7 +10,6 @@ import java.nio.charset.Charset;
 import com.google.common.net.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import common.Elasticsearch.WriteDocResponse;
 
 public class WebClient {
     public static class WebResponseException extends Exception {

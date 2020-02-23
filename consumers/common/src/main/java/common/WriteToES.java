@@ -5,9 +5,12 @@ import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
+import org.slf4j.LoggerFactory;
 
 public class WriteToES<T extends Elasticsearch.ESDoc> extends PTransform<PCollection<T>, PDone> {
     private static final long serialVersionUID = 1L;
+    private static org.slf4j.Logger LOG = LoggerFactory.getLogger(Elasticsearch.class);
+
     private String elasticSearchUrl;
 
     public WriteToES(String elasticSearchUrl) {
@@ -30,7 +33,11 @@ public class WriteToES<T extends Elasticsearch.ESDoc> extends PTransform<PCollec
 
         @ProcessElement
         public void processElement(@Element T doc) {
-            Elasticsearch.writeDoc(doc, this.elasticSearchUrl);
+            try {
+                Elasticsearch.writeDoc(doc, this.elasticSearchUrl);
+            } catch (Exception e) {
+                LOG.error(Json.format(doc), e);
+            }
         }
     }
 }

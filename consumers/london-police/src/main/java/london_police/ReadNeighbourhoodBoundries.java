@@ -45,7 +45,7 @@ public class ReadNeighbourhoodBoundries
                 throws WebResponseException, IOException, InterruptedException {
             LOG.info(String.format("Reading: %s -> %s", neighbourhood.force.name,
                     neighbourhood.name));
-            NeighbourhoodBoundryResponse.Point[] points = App.apiReader.getJson(
+            NeighbourhoodBoundryResponse.Point[] points = App.apiReaderUKPolice.getJson(
                     String.format("%s/%s/%s/boundary", this.apiPoliceUrl,
                             WebClient.urlEncode(neighbourhood.force.id),
                             WebClient.urlEncode(neighbourhood.id)),

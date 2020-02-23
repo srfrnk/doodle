@@ -32,7 +32,7 @@ public class ReadNeighbourhoods extends BundledParDo<ForceResponse, Neighbourhoo
             try {
                 LOG.info(String.format("Reading: %s", force.name));
                 NeighbourhoodResponse[] neighbourhoodRespones =
-                        App.apiReader.getJson(
+                        App.apiReaderUKPolice.getJson(
                                 String.format("%s/%s/neighbourhoods", this.apiPoliceUrl,
                                         WebClient.urlEncode(force.id)),
                                 NeighbourhoodResponse[].class);

@@ -67,7 +67,8 @@ public abstract class ReadAllAndSplitSource<T> extends BoundedSource<T> {
         }
     }
 
-    private static class SplitReader<T> extends BoundedReader<T> {
+    private static class SplitReader<T> extends BoundedReader<T> implements Serializable {
+        private static final long serialVersionUID = 1L;
         private SplitSource<T> source;
         private T[] dataArray;
         private int from;

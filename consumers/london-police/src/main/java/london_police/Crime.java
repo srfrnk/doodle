@@ -3,6 +3,7 @@ package london_police;
 import com.google.gson.annotations.SerializedName;
 import common.Helper;
 import common.Elasticsearch.ESDoc;
+import common.PostCodeReader.PostCode;
 
 public class Crime extends ESDoc {
     private static final long serialVersionUID = 1L;
@@ -12,13 +13,20 @@ public class Crime extends ESDoc {
         this.location = new Location();
     }
 
-    public Crime(String latitude, String longitude) {
-        this();
-        this.location =new Location(latitude,longitude);
-    }
+    @SerializedName("neighbourhoodBoundary")
+    NeighbourhoodBoundary neighbourhoodBoundary;
 
     @SerializedName("location")
     Location location;
+
+    @SerializedName("month")
+    String month;
+
+    @SerializedName("category")
+    String category;
+
+    @SerializedName("postcode")
+    PostCode postcode;
 
     @Override
     public boolean equals(Object obj) {

@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import org.apache.beam.runners.direct.DirectOptions;
 import org.apache.beam.runners.direct.DirectRunner;
+import org.apache.beam.runners.flink.FlinkPipelineOptions;
+import org.apache.beam.runners.flink.FlinkRunner;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.slf4j.Logger;
@@ -19,18 +21,25 @@ public class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     public static String apiPoliceUrl = "https://data.police.uk/api";
     public static String elasticSearchUrl = "http://localhost:9200";
-    public static ApiReader apiReader = new ApiReader(15); // This will break idempotency of
-                                                           // transforms but since running within
-                                                           // same process it can still be safely
-                                                           // used.
+    public static ApiReader apiReaderUKPolice = new ApiReader(15); // This will break idempotency of
+    // transforms but since running within
+    // same process it can still be safely
+    // used.
+
+    public static ApiReader apiReaderPostCode = new ApiReader(20); // This will break idempotency of
+    // transforms but since running within
+    // same process it can still be safely
+    // used.
 
     public static void main(String[] args) throws URISyntaxException, IOException {
         if (args.length < 1) {
             LOG.error("Either 'boundaries' or 'crimes' must be specified in args.");
         } else {
+
             DirectOptions options = PipelineOptionsFactory.create().as(DirectOptions.class);
             options.setRunner(DirectRunner.class);
             options.setTargetParallelism(20);
+
             Pipeline p = Pipeline.create(options);
             switch (args[0]) {
                 case "boundaries":
