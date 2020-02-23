@@ -1,15 +1,28 @@
 package london_police;
 
+import java.io.Serializable;
+import java.util.Comparator;
+import org.apache.beam.sdk.coders.AvroCoder;
 import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.transforms.Flatten;
+import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.Sample;
+import org.apache.beam.sdk.transforms.Top;
+import org.apache.beam.sdk.transforms.Values;
+import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
+import org.apache.beam.sdk.values.TypeDescriptor;
 import org.apache.beam.sdk.values.TypeDescriptors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import akka.stream.impl.fusing.GroupBy;
+import common.ArraySplitterDoFn;
 import common.Json;
 import common.WriteToES;
 
@@ -36,8 +49,6 @@ public class UpdateCrimes extends PTransform<PBegin, PDone> {
         PCollection<Crime> crimes =
                 neighbourhoodBoundaries.apply(new ReadCrimes(this.apiPoliceUrl));
 
-        return crimes.apply(MapElements.into(TypeDescriptors.strings()).via((c) -> Json.format(c)))
-                .apply(TextIO.write().to("./data/d.json"));
-        // return crimes.apply(new WriteToES<Crime>(this.elasticSearchUrl));
+        return crimes.apply(new WriteToES<Crime>(this.elasticSearchUrl));
     }
 }

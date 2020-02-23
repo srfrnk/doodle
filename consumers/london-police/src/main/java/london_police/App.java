@@ -36,9 +36,9 @@ public class App {
             LOG.error("Either 'boundaries' or 'crimes' must be specified in args.");
         } else {
 
-            DirectOptions options = PipelineOptionsFactory.create().as(DirectOptions.class);
-            options.setRunner(DirectRunner.class);
-            options.setTargetParallelism(20);
+            FlinkPipelineOptions options =
+                    PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
+            options.setRunner(FlinkRunner.class);
 
             Pipeline p = Pipeline.create(options);
             switch (args[0]) {

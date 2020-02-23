@@ -24,16 +24,16 @@ public class ApiReader {
                 return WebClient.getJson(url, clazz);
             } catch (WebResponseException e) {
                 if (e.statusCode >= 500) {
-                    // LOG.info(String.format("%s", url));
+                    LOG.debug(String.format("%s", url));
                 }
                 // if (e.statusCode != 429) {
                 // throw e;
                 // }
             } catch (IOException e) {
-                // LOG.info(Json.format(e));
+                LOG.debug(Json.format(e));
             }
             retryCount++;
-            LOG.info(String.format("Retry %d: %s", retryCount, url));
+            LOG.debug(String.format("Retry %d: %s", retryCount, url));
         }
     }
 
@@ -46,16 +46,16 @@ public class ApiReader {
                 return WebClient.postJson(url, data, contentType, clazz);
             } catch (WebResponseException e) {
                 if (e.statusCode >= 500) {
-                    // LOG.info(String.format("%s %s", url, data));
+                    LOG.debug(String.format("%s %s", url, data));
                 }
                 // if (e.statusCode != 429) {
                 // throw e;
                 // }
             } catch (IOException e) {
-                // LOG.info(Json.format(e));
+                LOG.debug(Json.format(e));
             }
             retryCount++;
-            LOG.info(String.format("Retry %d: %s %s", retryCount, url, data));
+            LOG.debug(String.format("Retry %d: %s %s", retryCount, url, data));
         }
     }
 }

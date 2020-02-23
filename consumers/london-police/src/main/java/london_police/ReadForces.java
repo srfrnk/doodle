@@ -2,7 +2,7 @@ package london_police;
 
 import java.io.IOException;
 import org.apache.beam.sdk.coders.Coder;
-import org.apache.beam.sdk.coders.SerializableCoder;
+import org.apache.beam.sdk.coders.AvroCoder;
 import org.apache.beam.sdk.io.Read;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.PTransform;
@@ -24,8 +24,7 @@ public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
 
     @Override
     public PCollection<ForceResponse> expand(PBegin input) {
-        return input.apply("Read Forces",
-                Read.from(new ForcesSource(this.apiPoliceUrl)));
+        return input.apply("Read Forces", Read.from(new ForcesSource(this.apiPoliceUrl)));
     }
 
     private static class ForcesSource extends ReadAllAndSplitSource<ForceResponse> {
@@ -43,8 +42,8 @@ public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
             LOG.info(String.format("Reading..."));
             ForceResponse[] forces;
             try {
-                forces = App.apiReaderUKPolice.getJson(String.format("%s/forces", this.apiPoliceUrl),
-                        ForceResponse[].class);
+                forces = App.apiReaderUKPolice.getJson(
+                        String.format("%s/forces", this.apiPoliceUrl), ForceResponse[].class);
                 return forces;
             } catch (WebResponseException | IOException | InterruptedException e) {
                 LOG.error("Error reading forces:", e);
@@ -59,7 +58,7 @@ public class ReadForces extends PTransform<PBegin, PCollection<ForceResponse>> {
 
         @Override
         public Coder<ForceResponse> getOutputCoder() {
-            return SerializableCoder.of(ForceResponse.class);
+            return AvroCoder.of(ForceResponse.class);
         }
     }
 }

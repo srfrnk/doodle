@@ -33,7 +33,7 @@ public class ApiPagesSource extends SplitReadersSource<ListingResponse.Listing, 
                 splits[i] = String.format("%s&number_of_results=50&listing_type=rent&page=%d",
                         this.apiNestoriaUrl, i + 1);
             }
-            LOG.info(String.format("Reading %d pages...", pageCount));
+            LOG.debug(String.format("Reading %d pages...", pageCount));
             return splits;
         } catch (WebResponseException | IOException | InterruptedException e) {
             LOG.error("", e);
@@ -44,7 +44,7 @@ public class ApiPagesSource extends SplitReadersSource<ListingResponse.Listing, 
     @Override
     public Listing[] readSplit(String splitData) {
         try {
-            LOG.info(String.format("Reading page %s", splitData));
+            LOG.debug(String.format("Reading page %s", splitData));
             ListingResponse res = App.apiReader.getJson(splitData, ListingResponse.class);
             return res.response.listings;
         } catch (WebResponseException | IOException | InterruptedException e) {

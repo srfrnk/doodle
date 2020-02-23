@@ -234,7 +234,7 @@ public class PostCodeReader {
             return postCodeResponse.results[0];
             // return postCodeResponse.results.length == 0 ? null : postCodeResponse.results[0];
         } catch (NullPointerException e) {
-            LOG.info(String.format("lon=%s&lat=%s", longitude, latitude)
+            LOG.debug(String.format("lon=%s&lat=%s", longitude, latitude)
                     + Json.format(postCodeResponse));
             return new PostCode();
         }

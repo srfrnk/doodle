@@ -13,7 +13,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import org.apache.beam.sdk.coders.AvroCoder;
 import org.apache.beam.sdk.coders.KvCoder;
-import org.apache.beam.sdk.coders.SerializableCoder;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.PTransform;
@@ -44,7 +43,7 @@ public class BundledParDo<I, O extends Serializable>
                         AvroCoder.of(this.clazzOArray)))
                 .apply(GroupByKey.create()).apply(Values.create())
                 .apply(ParDo.of(new ArrayExpander<O>()))
-                .setCoder(SerializableCoder.of(this.clazzO));
+                .setCoder(AvroCoder.of(this.clazzO));
     }
 
     public static abstract class ArrayBundler<I, O> extends DoFn<I, KV<Integer, O[]>> {
