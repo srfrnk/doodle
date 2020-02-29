@@ -24,7 +24,7 @@ public class ApiPagesSource extends SplitReadersSource<ListingResponse.Listing, 
     public String[] getSplitArray(PipelineOptions options) {
         ListingResponse res;
         try {
-            res = App.apiReader.getJson(
+            res = App.apiReaderNestoria.getJson(
                     String.format("%s&number_of_results=1&listing_type=rent", this.apiNestoriaUrl),
                     ListingResponse.class);
             int pageCount = (int) Math.ceil(res.response.totalResults / 50.0);
@@ -45,7 +45,7 @@ public class ApiPagesSource extends SplitReadersSource<ListingResponse.Listing, 
     public Listing[] readSplit(String splitData) {
         try {
             LOG.debug(String.format("Reading page %s", splitData));
-            ListingResponse res = App.apiReader.getJson(splitData, ListingResponse.class);
+            ListingResponse res = App.apiReaderNestoria.getJson(splitData, ListingResponse.class);
             return res.response.listings;
         } catch (WebResponseException | IOException | InterruptedException e) {
             LOG.error("", e);

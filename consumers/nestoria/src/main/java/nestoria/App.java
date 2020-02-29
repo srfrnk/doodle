@@ -18,27 +18,33 @@ import common.ApiReader;
 import common.Elasticsearch;
 
 public class App {
-    private static final Logger LOG = LoggerFactory.getLogger(App.class);
-    public static String apiNestoriaUrl =
-            "https://api.nestoria.co.uk/api?encoding=json&pretty=0&action=search_listings&country=uk&place_name=london";
-    // public static String apiNestoriaUrl = "https://api.nestoria.co.uk/api?encoding=json&pretty=0&action=search_listings&country=uk&place_name=london&number_of_results=50&listing_type=rent&page=2";
-    public static String elasticSearchUrl = "http://localhost:9200";
-    public static ApiReader apiReader = new ApiReader(1); // This will break idempotency of
-                                                          // transforms but since running within
-                                                          // same process it can still be safely
-                                                          // used.
+        private static final Logger LOG = LoggerFactory.getLogger(App.class);
+        public static String apiNestoriaUrl =
+                        "https://api.nestoria.co.uk/api?encoding=json&pretty=0&action=search_listings&country=uk&place_name=london";
+        // public static String apiNestoriaUrl = "https://api.nestoria.co.uk/api?encoding=json&pretty=0&action=search_listings&country=uk&place_name=london&number_of_results=50&listing_type=rent&page=2";
+        public static String elasticSearchUrl = "http://localhost:9200";
+        public static ApiReader apiReaderNestoria = new ApiReader(1); // This will break idempotency of
+                                                              // transforms but since running within
+                                                              // same process it can still be safely
+                                                              // used.
 
-    public static void main(String[] args) throws URISyntaxException, IOException {
-        Elasticsearch.deleteIndex("home_rentals", elasticSearchUrl);
-        Elasticsearch.mapIndex("home_rentals", Map.ofEntries(Map.entry("location", "geo_point")),
-                elasticSearchUrl);
+        public static ApiReader apiReaderPostCode = new ApiReader(20); // This will break idempotency of
+                                                                       // transforms but since running within
+                                                                       // same process it can still be safely
+                                                                       // used.
 
-        FlinkPipelineOptions options =
-                PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
-        options.setRunner(FlinkRunner.class);
+        public static void main(String[] args) throws URISyntaxException, IOException {
+                Elasticsearch.deleteIndex("home_rentals", elasticSearchUrl);
+                Elasticsearch.mapIndex("home_rentals",
+                                Map.ofEntries(Map.entry("location", "geo_point")),
+                                elasticSearchUrl);
 
-        Pipeline p = Pipeline.create(options);
-        p.apply(new UpdateHomeRentals(App.apiNestoriaUrl, elasticSearchUrl));
-        p.run().waitUntilFinish();
-    }
+                FlinkPipelineOptions options =
+                                PipelineOptionsFactory.create().as(FlinkPipelineOptions.class);
+                options.setRunner(FlinkRunner.class);
+
+                Pipeline p = Pipeline.create(options);
+                p.apply(new UpdateHomeRentals(App.apiNestoriaUrl, elasticSearchUrl));
+                p.run().waitUntilFinish();
+        }
 }

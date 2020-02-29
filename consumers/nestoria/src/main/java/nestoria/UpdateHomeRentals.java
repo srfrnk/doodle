@@ -25,7 +25,7 @@ public class UpdateHomeRentals extends PTransform<PBegin, PDone> {
     public PDone expand(PBegin input) {
         input.apply("Read page count", Read.from(new ApiPagesSource(this.apiNestoriaUrl)))
                 .apply("Map to HomeRental", ParDo.of(new MapToHomeRental()))
-                .apply("Wrtie to ES", new WriteToES<>(this.elasticSearchUrl));
+                .apply("Write to ES", new WriteToES<>(this.elasticSearchUrl));
         return PDone.in(input.getPipeline());
     }
 }

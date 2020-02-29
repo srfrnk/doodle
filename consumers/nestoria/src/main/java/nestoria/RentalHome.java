@@ -1,6 +1,7 @@
 package nestoria;
 
 import common.Elasticsearch.ESDoc;
+import common.PostCodeReader.PostCode;
 
 public class RentalHome extends ESDoc {
     private static final long serialVersionUID = 1L;
@@ -20,4 +21,5 @@ public class RentalHome extends ESDoc {
     double pricePerMonth;
     String propertyType;
     double size;
+    public PostCode postcode;
 }
