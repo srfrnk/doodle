@@ -51,5 +51,7 @@ dependencies {
     annotationProcessor 'com.google.auto.value:auto-value:1.6.3'
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
+compileJava {
+  sourceCompatibility = '11'
+  targetCompatibility = '11'
+}

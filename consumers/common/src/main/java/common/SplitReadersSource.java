@@ -1,6 +1,7 @@
 package common;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -8,6 +9,7 @@ import java.util.function.Function;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.io.BoundedSource;
 import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.transforms.SerializableFunction;
 
 public abstract class SplitReadersSource<T, S> extends BoundedSource<T> {
     private static final long serialVersionUID = 1L;
@@ -45,7 +47,7 @@ public abstract class SplitReadersSource<T, S> extends BoundedSource<T> {
         private static final long serialVersionUID = 1L;
         private SplitReader<T, S> reader;
 
-        public SplitSource(S splitData, Function<S, T[]> readSplit) {
+        public SplitSource(S splitData, SerializableFunction<S, T[]> readSplit) {
             this.reader = new SplitReader<>(this, splitData, readSplit);
         }
 
@@ -66,14 +68,16 @@ public abstract class SplitReadersSource<T, S> extends BoundedSource<T> {
         }
     }
 
-    private static class SplitReader<T, S> extends BoundedReader<T> {
+    private static class SplitReader<T, S> extends BoundedReader<T> implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         private SplitSource<T, S> source;
         private S splitData;
         private T[] data;
         private int current;
-        private Function<S, T[]> readSplit;
+        private SerializableFunction<S, T[]> readSplit;
 
-        public SplitReader(SplitSource<T, S> source, S splitData, Function<S, T[]> readSplit) {
+        public SplitReader(SplitSource<T, S> source, S splitData, SerializableFunction<S, T[]> readSplit) {
             this.source = source;
             this.splitData = splitData;
             this.readSplit = readSplit;
